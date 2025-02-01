@@ -1,0 +1,11 @@
+{
+  "summary": {
+    "en-US": "Renders ANSI SGR escape codes when viewing .txt files in your browser."
+  },
+  "categories": [
+    "other"
+  ],
+  "version": {
+    "license": "MIT"
+  }
+}

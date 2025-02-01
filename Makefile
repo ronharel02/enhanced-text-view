@@ -4,12 +4,15 @@ NAME := $(shell jq --raw-output ".name" src/manifest.json | sed -e 's/\(.*\)/\L\
 DOCKER_IMAGE = $(NAME)/extension-builder:$(VERSION)
 
 # Targets
+.PHONY: clean-icons clean-docker clean-dist clean-bundle clean setup-git-filters generate-icons npm-install bundle-js debug docker-builder run-docker build publish # Abusing make is fun :D
+
 clean-icons:
 	rm -f src/icons/*
 	jq 'del(.icons)' src/manifest.json | sponge src/manifest.json
 
 clean-docker:
 	docker image rm $(DOCKER_IMAGE) || true
+	docker container prune -f
 
 clean-dist:
 	rm -rf dist/*
@@ -20,8 +23,8 @@ clean-bundle:
 clean: clean-icons clean-docker clean-dist clean-bundle
 
 setup-git-filters:
-	git config --global filter.ignore-manifest-icons.clean "jq 'del(.icons)'"
-	git config --global filter.ignore-manifest-icons.smudge cat
+	git config filter.ignore-manifest-icons.clean "jq 'del(.icons)'"
+	git config filter.ignore-manifest-icons.smudge cat
 
 generate-icons: setup-git-filters
 	@mkdir -p src/icons;                                                                                                          \
@@ -36,7 +39,7 @@ npm-install:
 	npm install
 
 bundle-js: npm-install
-	node_modules/esbuild/bin/esbuild src/content.js --bundle --outfile=src/bundle.js
+	npx esbuild src/content.js --bundle --outfile=src/bundle.js
 
 debug: generate-icons bundle-js
 
@@ -47,9 +50,16 @@ docker-builder:
 		echo "Docker image $(DOCKER_IMAGE) already exists, skipping build."; \
 	fi
 
-build: clean-dist generate-icons docker-builder
+run-docker: clean-dist generate-icons docker-builder
 	docker run --rm               \
 	-v $(PWD)/secrets:/secrets    \
 	-v $(PWD)/dist:/dist          \
 	-v $(PWD)/src:/extension-pack \
-	$(DOCKER_IMAGE) $(ARGS)
+	$(DOCKER_IMAGE) $(RUN_ARGS)
+
+build:
+	$(MAKE) run-docker RUN_ARGS=""
+
+publish:
+	$(MAKE) run-docker RUN_ARGS="--publish"
+

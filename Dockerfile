@@ -7,7 +7,8 @@ RUN apt update && apt install -y \
     openssl                      \
     chromium                     \
     nodejs                       \
-    npm
+    npm                          \
+    jq
 
 ADD package.json /home/package.json
 RUN npm install
@@ -16,4 +17,4 @@ ENV PATH="$PATH:/home/node_modules/.bin"
 VOLUME [ "/secrets", "/dist", "/extension-pack" ]
 ADD build_packages.sh /entrypoint.sh
 
-CMD ["bash", "/entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
