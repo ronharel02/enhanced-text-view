@@ -1,0 +1,6 @@
+.vscode
+.zed
+icons
+node_modules
+package-lock.json
+package.json

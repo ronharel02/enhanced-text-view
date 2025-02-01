@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Enhanced Text View",
+  "version": "1.0",
+  "description": "Renders ANSI SGR escape codes when viewing .txt files in your browser.",
+  "content_scripts": [
+    {
+      "matches": [
+        "file://*/*.txt",
+        "https://*/*.txt",
+        "http://*/*.txt"
+      ],
+      "js": [
+        "content_scripts.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "permissions": [],
+  "icons": {
+    "512": "icons/icon.png"
+  }
+}
