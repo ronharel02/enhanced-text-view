@@ -50,4 +50,17 @@ var convert = new Convert();
     container.appendChild(line_numbers);
     container.appendChild(content);
     document.body.appendChild(container);
+
+    // Handle extension settings.
+    const storage = typeof browser !== "undefined" ? browser.storage.sync : chrome.storage.sync;
+
+    storage.get("toggleLineNumbers", function (data) {
+        line_numbers.style.display = data.showDiv ? "block" : "none";
+    });
+
+    storage.onChanged.addListener(function (changes, namespace) {
+        if (changes.toggleLineNumbers) {
+            line_numbers.style.display = changes.toggleLineNumbers.newValue ? "block" : "none";
+        }
+    });
 })();

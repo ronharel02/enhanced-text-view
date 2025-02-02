@@ -26,8 +26,13 @@
       "run_at": "document_end"
     }
   ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
   "host_permissions": [
     "<all_urls>"
   ],
-  "permissions": []
+  "permissions": [
+    "storage"
+  ]
 }
