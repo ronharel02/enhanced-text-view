@@ -1,5 +1,31 @@
 var Convert = require('ansi-to-html');
-var convert = new Convert();
+var convert = new Convert({ stream: true });
+
+var osc8 = require('./osc8');
+
+function escapeHtmlAttribute(value) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function sanitizeLinkUrl(url) {
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch (e) {
+        return null;
+    }
+
+    const allowedProtocols = ['http:', 'https:', 'mailto:'];
+    if (!allowedProtocols.includes(parsed.protocol)) {
+        return null;
+    }
+
+    return parsed.href;
+}
 
 (function() {
     // Ensure we're modifying a plain text file view.
@@ -34,14 +60,31 @@ var convert = new Convert();
     let content = document.createElement("div");
     content.style.textAlign = "left";
 
-    // Add line numbers and text line by line.
-    let rendered_lines = convert.toHtml(preElement.textContent).split(/\n/,);
+    // Convert each line separately so ANSI spans and <a> tags never straddle a line boundary.
+    const segments = osc8.parseOsc8Segments(preElement.textContent);
+    const rendered_lines = [''];
+    for (const segment of segments) {
+        const safeUrl = segment.url && sanitizeLinkUrl(segment.url);
+        const openTag = safeUrl
+            ? `<a href="${escapeHtmlAttribute(safeUrl)}" target="_blank" rel="noopener noreferrer">`
+            : '';
+        const closeTag = safeUrl ? '</a>' : '';
+
+        const pieces = segment.text.split('\n');
+        pieces.forEach((piece, i) => {
+            if (i > 0) rendered_lines.push('');
+            rendered_lines[rendered_lines.length - 1] +=
+                openTag + convert.toHtml(piece) + closeTag;
+        });
+    }
+
     rendered_lines.forEach((line, index) => {
         let lineNumber = document.createElement("div");
         lineNumber.textContent = index + 1;
         line_numbers.appendChild(lineNumber);
 
         let line_content = document.createElement("div");
+        // `line` only contains HTML escaped by ansi-to-html or escapeHtmlAttribute.
         line_content.innerHTML = line || " "; // Preserve empty lines.
         content.appendChild(line_content);
     });
