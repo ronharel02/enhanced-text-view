@@ -1,5 +1,31 @@
 var Convert = require('ansi-to-html');
-var convert = new Convert();
+var convert = new Convert({ stream: true });
+
+var osc8 = require('./osc8');
+
+function escapeHtmlAttribute(value) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function sanitizeLinkUrl(url) {
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch (e) {
+        return null;
+    }
+
+    const allowedProtocols = ['http:', 'https:', 'mailto:'];
+    if (!allowedProtocols.includes(parsed.protocol)) {
+        return null;
+    }
+
+    return parsed.href;
+}
 
 (function() {
     // Ensure we're modifying a plain text file view.
@@ -35,7 +61,16 @@ var convert = new Convert();
     content.style.textAlign = "left";
 
     // Add line numbers and text line by line.
-    let rendered_lines = convert.toHtml(preElement.textContent).split(/\n/,);
+    const segments = osc8.parseOsc8Segments(preElement.textContent);
+    const rendered_html = segments.map((segment) => {
+        const segmentHtml = convert.toHtml(segment.text);
+        const safeUrl = segment.url && sanitizeLinkUrl(segment.url);
+        return safeUrl
+            ? `<a href="${escapeHtmlAttribute(safeUrl)}" target="_blank" rel="noopener noreferrer">${segmentHtml}</a>`
+            : segmentHtml;
+    }).join('');
+
+    const rendered_lines = rendered_html.split(/\n/);
     rendered_lines.forEach((line, index) => {
         let lineNumber = document.createElement("div");
         lineNumber.textContent = index + 1;
