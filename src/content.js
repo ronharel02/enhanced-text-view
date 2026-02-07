@@ -3,7 +3,8 @@ var convert = new Convert();
 
 (function() {
     // Ensure we're modifying a plain text file view.
-    if (document.contentType !== "text/plain") {
+    const allowedContentTypes = ["text/plain", "text/x-ansi", "text/ansi"];
+    if (!allowedContentTypes.includes(document.contentType)) {
         return;
     }
 
