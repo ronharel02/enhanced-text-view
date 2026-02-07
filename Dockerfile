@@ -2,13 +2,13 @@ FROM debian:latest
 
 WORKDIR /home
 
-RUN apt update && apt install -y \
-    zip                          \
-    openssl                      \
-    chromium                     \
-    nodejs                       \
-    npm                          \
-    jq
+RUN apt-get update && apt-get install -y \
+	zip                          \
+	openssl                      \
+	chromium                     \
+	nodejs                       \
+	npm                          \
+	jq
 
 ADD package.json /home/package.json
 RUN npm install

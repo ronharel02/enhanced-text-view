@@ -30,7 +30,7 @@ generate-icons: setup-git-filters
 	@mkdir -p src/icons;                                                                                                          \
 	icons_json="{}";                                                                                                              \
 	for size in 48 256 512; do                                                                                                    \
-		magick convert -background none -resize $${size}x$${size} assets/icon.svg src/icons/icon_$${size}.png;                    \
+		magick assets/icon.svg -background none -resize $${size}x$${size} src/icons/icon_$${size}.png;                            \
 		icons_json=$$(jq --arg size "$${size}" --arg file "icons/icon_$${size}.png" '. + {($$size): $$file}' <<< "$$icons_json"); \
 	done;                                                                                                                         \
 	jq --argjson icons "$$icons_json" '.icons = $$icons' src/manifest.json | sponge src/manifest.json;
@@ -62,4 +62,3 @@ build:
 
 publish:
 	$(MAKE) run-docker RUN_ARGS="--publish"
-
