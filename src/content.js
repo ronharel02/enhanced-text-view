@@ -99,7 +99,7 @@ function sanitizeLinkUrl(url) {
     const storage = typeof browser !== "undefined" ? browser.storage.sync : chrome.storage.sync;
 
     storage.get("toggleLineNumbers", function (data) {
-        line_numbers.style.display = data.showDiv ? "block" : "none";
+        line_numbers.style.display = data.toggleLineNumbers ? "block" : "none";
     });
 
     storage.onChanged.addListener(function (changes, namespace) {
