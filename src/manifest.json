@@ -8,9 +8,6 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "{5fdfa271-5df3-4d64-99e6-fb566f871e11}"
-    },
-    "chrome": {
-      "id": "{5fdfa271-5df3-4d64-99e6-fb566f871e11}"
     }
   },
   "content_scripts": [
