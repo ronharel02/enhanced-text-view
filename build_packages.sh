@@ -59,6 +59,10 @@ if ! $PUBLISH; then
     web-ext build --source-dir=$EXTENSION_DIR --artifacts-dir=$OUTPUT_DIR --filename="$EXTENSION_NAME.xpi" --overwrite-dest
 else
     echo "Signing and publishing firefox extension to AMO."
+    if [ ! -f "$SECRETS_DIR/amo.env" ]; then
+        echo "Error: $SECRETS_DIR/amo.env not found (must export AMO_JWT_ISSUER and AMO_JWT_SECRET)."
+        exit 1
+    fi
     source "$SECRETS_DIR/amo.env"
     web-ext sign                                          \
         --no-input                                        \
@@ -69,7 +73,7 @@ else
         --api-key=$AMO_JWT_ISSUER                         \
         --api-secret=$AMO_JWT_SECRET                      \
         --channel listed
-    mv "$OUTPUT_DIR/*.xpi" "$OUTPUT_DIR/$EXTENSION_NAME.xpi"
+    mv "$OUTPUT_DIR"/*.xpi "$OUTPUT_DIR/$EXTENSION_NAME.xpi"
 fi
 
 echo "Operation complete!"
